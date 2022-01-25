@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <title>Photozone A</title>
+
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://libs.zappar.com/zappar-aframe/0.3.29/zappar-aframe.js"></script>
+</head>
+
+<body>
+<!-- Управление по нажатию на элементы в доп реальности-->
+<a-scene cursor="rayOrigin: mouse" raycaster="objects: [data-clickable]">
+    <!-- Загружаем ассеты -->
+    <a-assets>
+        <!-- Национальная шапка (2D)-->
+        <img
+                id="example"
+                src="https://cdn.glitch.global/2c27ad14-c823-4d6e-9352-eaa40b3779da/koko.png?v=1643098532341"
+        />
+        <!-- Китайская шляпа (3D) -->
+        <a-asset-item id="hatModel" src="https://cdn.glitch.global/2c27ad14-c823-4d6e-9352-eaa40b3779da/hat.glb?v=1643119461471"></a-asset-item>
+
+<!--Кнопки управления: вперед и назад-->
+        <img
+                id="next"
+                src="https://cdn.glitch.global/2c27ad14-c823-4d6e-9352-eaa40b3779da/strelochka.png?v=1643097301404"
+        />
+        <img
+                id="prev"
+                src="https://cdn.glitch.global/2c27ad14-c823-4d6e-9352-eaa40b3779da/strelkalevo.png?v=1643097296375"
+        />
+    </a-assets>
+
+    <!-- Получение разрешения на использование камеры и вывод сообщения-->
+    <a-entity zappar-permissions-ui id="permissions">
+        <a-entity
+                text="value: Please reload the page, accepting the camera permissions."
+                position="0 0 -2"
+        >
+        </a-entity>
+    </a-entity>
+
+    <!--Подключение камеры с возможностью распознавания лиц-->
+    <a-entity camera zappar-camera="user-facing: true;"> </a-entity>
+
+    <!-- Трекинг лица: при наложении на лицо отображаются элементы находящиеся внутри контейнера с компонентом ZAPPAR-FACE  -->
+    <a-entity zappar-face id="face-track">
+        <!--    Отображение шапки (2D)      -->
+        <a-entity
+                visible="false"
+                id="facemesh0"
+                geometry="primitive: plane;"
+                material="src:#example; transparent: true;"
+                rotation="0 0 0"
+                scale="1.5 1.5 1.5"
+                position="0 0.7 .8"
+        ></a-entity>
+
+<!--        &lt;!&ndash; Отображение короны (3D объект + материал) &ndash;&gt;-->
+<!--        <a-obj-model-->
+<!--                src="#crown"-->
+<!--                mtl="#crown-mtl"-->
+<!--                visible="false"-->
+<!--                id="facemesh1"-->
+<!--                rotation="-90 0 0"-->
+<!--                scale="0.075 0.075 0.075"-->
+<!--                position="0.008 0.530 0.329"-->
+<!--        ></a-obj-model>-->
+        <a-gltf-model
+                src="#hatModel"
+                visible = "false"
+                id = "facemesh1"
+                rotation = "90 0 0"
+                scale = "90 0 0"
+                position = "2 2 2"
+        ></a-gltf-model>
+        <a-entity gltf-model="#hatModel" modify-materials></a-entity>
+        <!--Отображение управляющих элементов: вперед и назад-->
+        <a-entity
+                geometry="primitive: plane"
+                material="src: #next; transparent: true;"
+                position="0.5 -1.5 0"
+                scale="0.5 0.5 0.5"
+                data-clickable
+                onclick="OnNextClick()"
+        ></a-entity>
+
+        <a-entity
+                geometry="primitive: plane"
+                material="src: #prev; transparent: true;"
+                position="-0.5 -1.5 0"
+                scale="0.5 0.5 0.5"
+                data-clickable
+                onclick="OnPrevClick()"
+        ></a-entity>
+    </a-entity>
+</a-scene>
+
+<!-- Переключение кода  -->
+<script>
+    // AFRAME.registerComponent('modify-materials', {
+    //     init: function () {
+    //         // Wait for model to load.
+    //         this.el.addEventListener('model-loaded', () => {
+    //             // Grab the mesh / scene.
+    //             const obj = this.el.getObject3D('mesh');
+    //             // Go over the submeshes and modify maetrials we want.
+    //             obj.traverse(node => {
+    //                 if (node.name.indexOf('ship') !== -1) {
+    //                     node.material.color.set('red');
+    //                 }
+    //             });
+    //         });
+    //     }
+    // });
+    var curr = 0; // текущая маска
+    var maskAmount = 2; // количество масок
+    var d = document; //сокращение для удобства работы
+    // Интерфейс документа представляет любую веб-страницу,
+    // загруженную в браузер, и служит точкой входа
+    // в содержимое веб-страницы, которое является деревом DOM.
+
+    // Пролистывание вперед
+    function OnNextClick() {
+        if (curr < maskAmount - 1) {
+            curr++; //curr = curr + 1
+            d.getElementById("facemesh" + curr).setAttribute("visible", true);
+            d.getElementById("facemesh" + (curr - 1)).setAttribute(
+                "visible",
+                false
+            );
+        }
+    }
+
+    // Пролистывание назад
+    function OnPrevClick() {
+        if (curr > 0) {
+            curr--;//curr = curr - 1
+            d.getElementById("facemesh" + curr).setAttribute("visible", true);
+            d.getElementById("facemesh" + (curr + 1)).setAttribute(
+                "visible",
+                false
+            );
+        }
+    }
+</script>
+</body>
+</html>
